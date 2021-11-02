@@ -16,8 +16,10 @@ def login():
     verify_epass = Wallet.encryption_password(user_password, user_id)
     user_epass = getData.Taken_password(user_account)
     if verify_epass == user_epass:
+        print("success")
         return jsonify({'result': 'success'})
     else:
+        print("fail")
         return jsonify({'result': 'fail', 'reason': '帳號密碼錯誤'})
 
 # 使用者註冊
@@ -85,5 +87,7 @@ def createSysNew():
     insertData.insert_System_bulletin(bul_title, bul_context)
     return jsonify({'result': 'success'})
 
+
+
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port='5000', debug=True)
+    app.run(host='192.168.204.162', port='5000', debug=True)

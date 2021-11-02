@@ -3,27 +3,29 @@ import Wallet
 import gridfs
 import cv2
 
+#local host
 conn = MongoClient()
-# database
+#database
 db = conn.localcurrency
-# collection
+#collection
 col_Information_user         = db.Information_user
 col_Information_demand       = db.Information_demand
 col_Photo                    = db.Photo
 col_Check_community_manager  = db.Check_community_manager
 col_Check_community_user     = db.Check_community_user
 col_Check_createcommunity    = db.Check_createcommunity
-col_Communitymembers         = db.Communitymembers
+col_Community_members        = db.Community_members
 col_Community_bulletin       = db.Community_bulletin
 col_System_bulletin          = db.System_bulletin
-# connect error or not
+col_System_members           = db.System_members
+#connect error or not
 col_Information_user.stats
 col_Information_demand.stats
 col_Photo.stats
 col_Check_community_manager.stats
 col_Check_community_user.stats
 col_Check_createcommunity.stats
-col_Communitymembers.stats
+col_Community_members.stats
 col_Community_bulletin.stats
 col_System_bulletin.stats
 
