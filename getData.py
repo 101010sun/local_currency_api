@@ -118,6 +118,17 @@ def download_photo(name):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+#取得_此帳號之需求資訊 ?
+def Taken_salelist(account):
+  myquery = {'requester_account': account}
+  projectionFields = ['requester_account']
+  cursor = col_Information_demand.find(myquery)
+  data = [d for d in cursor]
+  if data != list([]):
+      return data
+  else:
+      return None
+
 # 更新_用戶資訊
 def Modify_userinfo(account,newname,newsex,newbirth,newemail,newphone):
     col_Information_user.update_many({"account": account}, {'$set': {"name":newname,"sex": newsex,"birth": newbirth,"email": newemail,"phone": newphone}}, upsert=True)
@@ -125,6 +136,3 @@ def Modify_userinfo(account,newname,newsex,newbirth,newemail,newphone):
 #col.update_many({"name": "bob"}, {'$set': {"name":"BOB","id": "con_xxx_bob-iP-xxx"}}, upsert=True)
 # ----test----
 #print(Taken_userinfo('10sun'))
-
-Modify_userinfo('10sun','10sun','10sun','10sun','10sun','10sun')
-print(Taken_userinfo('10sun'))
