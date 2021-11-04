@@ -119,7 +119,7 @@ def download_photo(name):
     cv2.destroyAllWindows()
 
 #取得_此帳號之需求資訊 ?
-def Taken_salelist(account):
+def Taken_mysalelist(account):
   myquery = {'requester_account': account}
   projectionFields = ['requester_account']
   cursor = col_Information_demand.find(myquery)
@@ -129,10 +129,19 @@ def Taken_salelist(account):
   else:
       return None
 
+#取得_所有需求資訊
+def Taken_allsalelist():
+  cursor = col_Information_demand.find_one()
+  data = [d for d in cursor]
+  if data != list([]):
+    return data
+  else:
+    return None
+
 # 更新_用戶資訊
 def Modify_userinfo(account,newname,newsex,newbirth,newemail,newphone):
     col_Information_user.update_many({"account": account}, {'$set': {"name":newname,"sex": newsex,"birth": newbirth,"email": newemail,"phone": newphone}}, upsert=True)
     return True
 #col.update_many({"name": "bob"}, {'$set': {"name":"BOB","id": "con_xxx_bob-iP-xxx"}}, upsert=True)
 # ----test----
-#print(Taken_userinfo('10sun'))
+print(Taken_mysalelist())
