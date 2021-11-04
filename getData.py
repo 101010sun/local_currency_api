@@ -75,8 +75,17 @@ def Taken_userinfo(account):
     cursor = col_Information_user.find(myquery)
     data = [d for d in cursor]
     if data != list([]):
-        
         return data
+    else:
+        return None
+
+# 取得_此帳號用戶名
+def Taken_username(account):
+    projectionFields = ['name']
+    cursor = col_Information_user.find({"account": str(account)}, projection = projectionFields)
+    data = [d for d in cursor]
+    if data != list([]):
+        return (account,data[0]['name'])
     else:
         return None
 
@@ -109,5 +118,13 @@ def download_photo(name):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+# 更新_用戶資訊
+def Modify_userinfo(account,newname,newsex,newbirth,newemail,newphone):
+    col_Information_user.update_many({"account": account}, {'$set': {"name":newname,"sex": newsex,"birth": newbirth,"email": newemail,"phone": newphone}}, upsert=True)
+    return True
+#col.update_many({"name": "bob"}, {'$set': {"name":"BOB","id": "con_xxx_bob-iP-xxx"}}, upsert=True)
 # ----test----
-# Taken_userinfo('10')
+#print(Taken_userinfo('10sun'))
+
+Modify_userinfo('10sun','10sun','10sun','10sun','10sun','10sun')
+print(Taken_userinfo('10sun'))
