@@ -1,6 +1,6 @@
 from flask import Flask, json, request , jsonify
 from flask_cors import CORS
-import Wallet, insertData, getData
+from Model import Wallet, insertData, getData
 
 app = Flask(__name__)
 CORS(app)

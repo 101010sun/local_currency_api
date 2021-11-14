@@ -1,31 +1,35 @@
 from pymongo import MongoClient
-import Wallet
+from Model import Wallet
 import gridfs
 import cv2
 
+#local host
 conn = MongoClient()
-# database
+#database
 db = conn.localcurrency
-# collection
+#collection
 col_Information_user         = db.Information_user
 col_Information_demand       = db.Information_demand
 col_Photo                    = db.Photo
 col_Check_community_manager  = db.Check_community_manager
 col_Check_community_user     = db.Check_community_user
 col_Check_createcommunity    = db.Check_createcommunity
-col_Communitymembers         = db.Communitymembers
+col_Community_members        = db.Community_members
 col_Community_bulletin       = db.Community_bulletin
 col_System_bulletin          = db.System_bulletin
-# connect error or not
+col_System_members           = db.System_members
+col_Community                = db.Community
+#connect error or not
 col_Information_user.stats
 col_Information_demand.stats
 col_Photo.stats
 col_Check_community_manager.stats
 col_Check_community_user.stats
 col_Check_createcommunity.stats
-col_Communitymembers.stats
+col_Community_members.stats
 col_Community_bulletin.stats
 col_System_bulletin.stats
+col_Community.stats
 
 # 新增_使用者資訊
 def insert_Information_user(name,sex,id_card,birth,email,phone,address,account,photo_id,walletaddress,public_key,e_private_key,e_password): #加入帳戶資訊
@@ -106,6 +110,13 @@ def insert_Check_createcommunity(applicant_id,communityname,communityaddress):
     }
     col_Check_createcommunity.insert_one(data)   
 
+# 新增_平台管理者名單
+def insert_System_members(account):
+    data = {
+      'account': account
+    }
+    col_System_members.insert_one(data) 
+
 # 新增_社區用戶名單
 def insert_Communitymembers(user_id,communityaddress,identity):
     data = {
@@ -113,7 +124,16 @@ def insert_Communitymembers(user_id,communityaddress,identity):
       'communityaddress': communityaddress,
       'identity': identity
     }
-    col_Communitymembers.insert_one(data)   
+    col_Community_members.insert_one(data)   
+
+# 新增_社區名單
+def insert_community(community, community_wallet_address, community_private_key):
+    data = {
+        'community': community,
+        'community_wallet_address': community_wallet_address,
+        'community_private_key': community_private_key
+    }
+    col_Community.insert_one(data)
 
 # 新增_社區公告
 def insert_Community_bulletin(communityname, bul_title, bul_context):
@@ -131,6 +151,8 @@ def insert_System_bulletin(bul_title, bul_context):
         'bulletin_context': bul_context
     }
     col_System_bulletin.insert_one(data)
+
+
 
 # --------test--------
 # def register():

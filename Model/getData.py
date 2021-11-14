@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-import Wallet
+from Model import Wallet
 import gridfs
 import cv2
 
@@ -18,6 +18,7 @@ col_Community_members        = db.Community_members
 col_Community_bulletin       = db.Community_bulletin
 col_System_bulletin          = db.System_bulletin
 col_System_members           = db.System_members
+col_Community                = db.Community
 #connect error or not
 col_Information_user.stats
 col_Information_demand.stats
@@ -28,35 +29,7 @@ col_Check_createcommunity.stats
 col_Community_members.stats
 col_Community_bulletin.stats
 col_System_bulletin.stats
-
-# 檢查_此信箱和電話是否被使用過
-def Check_userinfor(email,phone):
-  cursor = col_Information_user.find({"email":str(email)})
-  data = [d for d in cursor]
-  cursor2 = col_Information_user.find({"phone":str(phone)})
-  data2 = [d for d in cursor2]
-  if data == list([]) and data2 == list([]):
-    return True
-  else:
-    return False
-
-# 檢查_此身分證號碼是否被使用過
-def Check_id(id_card):
-  cursor = col_Information_user.find({"id_card":str(id_card)})
-  data = [d for d in cursor]
-  if data == list([]): 
-    return True
-  else:
-    return False
-
-# 檢查_此帳號是否被使用過
-def Check_account(account):
-  cursor = col_Information_user.find({"account":str(account)})
-  data = [d for d in cursor]
-  if data == list([]): 
-    return True
-  else:
-    return False
+col_Community.stats
 
 # 取得_此帳號的加密密碼
 def Taken_password(account):
@@ -118,7 +91,7 @@ def download_photo(name):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-#取得_此帳號之需求資訊 ?
+# 取得_此帳號之需求資訊 ?
 def Taken_mysalelist(account):
   myquery = {'requester_account': account}
   projectionFields = ['requester_account']
@@ -129,7 +102,7 @@ def Taken_mysalelist(account):
   else:
       return None
 
-#取得_所有需求資訊
+# 取得_所有需求資訊
 def Taken_allsalelist():
   cursor = col_Information_demand.find_one()
   data = [d for d in cursor]
@@ -142,6 +115,35 @@ def Taken_allsalelist():
 def Modify_userinfo(account,newname,newsex,newbirth,newemail,newphone):
     col_Information_user.update_many({"account": account}, {'$set': {"name":newname,"sex": newsex,"birth": newbirth,"email": newemail,"phone": newphone}}, upsert=True)
     return True
+
+# 取得_此帳號錢包地址
+def taken_address(account):
+  projectionFields = ['wallet_address']
+  cursor = col_Information_user.find({"account": str(account)}, projection = projectionFields)
+  data = [d for d in cursor]
+  walletaddress = data[0]['wallet_address']
+  if data != list([]):
+    return walletaddress
+  else:
+    return None
+
+# 取得_平台錢包地址
+def taken_plat_address(account):
+  projectionFields = ['wallet_address']
+  cursor = col_System_members.find({"account": str(account)}, projection = projectionFields)
+  data = [d for d in cursor]
+  walletaddress = data[0]['wallet_address']
+  if data != list([]):
+    return walletaddress
+  else:
+    return None
+
+# 取得_社區名單
+def get_community():
+    cursor = col_Community.find()
+    data = [d for d in cursor]
+    return data
+
 #col.update_many({"name": "bob"}, {'$set': {"name":"BOB","id": "con_xxx_bob-iP-xxx"}}, upsert=True)
 # ----test----
-print(Taken_mysalelist())
+# print(Taken_mysalelist())
