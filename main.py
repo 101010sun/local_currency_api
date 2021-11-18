@@ -1,6 +1,6 @@
 from flask import Flask, json, request , jsonify
 from flask_cors import CORS
-from Model import Wallet, insertData, getData, checkData
+from Model import Wallet, insertData, getData
 
 app = Flask(__name__)
 CORS(app)
@@ -20,7 +20,7 @@ def login():
         return jsonify({'result': 'success'})
     else:
         print("fail")
-        return jsonify({'result': 'fail', 'reason': 'one'})
+        return jsonify({'result': 'fail', 'reason': '帳號密碼錯誤'})
 
 # 使用者註冊
 # [user_name, user_id, user_sex, user_birth, user_email, user_phone, user_address, user_account, user_password]
@@ -36,11 +36,11 @@ def signup():
     user_address = insertValues['user_address']
     user_photo = '' #--?
     e_id = Wallet.encryption_id_card(user_id)
-    check_id = checkData.Check_id(e_id)
+    check_id = getData.Check_id(e_id)
     if check_id:
         user_account = insertValues['user_account']
         user_password = insertValues['user_password']
-        check_account = checkData.Check_account(user_account)
+        check_account = getData.Check_account(user_account)
         if check_account:
             walletaddress, private_key = Wallet.generate_address()
             public_key = walletaddress
@@ -49,9 +49,9 @@ def signup():
             insertData.insert_Information_user(user_name, user_sex, e_id, user_birth, user_email, user_phone, user_address, user_account, user_photo, walletaddress, public_key, e_private_key, e_password)
             return jsonify({'result': 'success'})
         else:
-            return jsonify({'result': 'fail', 'reason': 'one'})
+            return jsonify({'result': 'fail', 'reason': '帳號已註冊過'})
     else:
-        return jsonify({'result': 'fail', 'reason': 'two'})
+        return jsonify({'result': 'fail', 'reason': '身分證號碼已註冊過'})
 
 # 使用者註冊、驗證身分證
 # [user_id]
@@ -60,11 +60,11 @@ def verifyid():
     insertValues = request.get_json()
     user_id = insertValues['user_id']
     e_id = Wallet.encryption_id_card(user_id)
-    check_id = checkData.Check_account(e_id)
+    check_id = getData.Check_account(e_id)
     if check_id:
         return jsonify({'result': 'success'})
     else:
-        return jsonify({'result': 'fail', 'reason': 'two'})
+        return jsonify({'result': 'fail', 'reason': '身分證號碼已註冊過'})
 
 # 新增社區公告
 # [communityname, bulletin_title, bulletin_context]
@@ -90,4 +90,4 @@ def createSysNew():
 
 
 if __name__ == '__main__':
-    app.run(host='192.168.204.162', port='5000', debug=True)
+    app.run(host='192.168.0.108', port='5000', debug=True)
