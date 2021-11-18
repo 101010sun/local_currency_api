@@ -1,6 +1,6 @@
 from flask import Flask, json, request , jsonify
 from flask_cors import CORS
-from Model import Wallet, insertData, getData
+from Model import Wallet, insertData, getData, checkData
 
 app = Flask(__name__)
 CORS(app)
@@ -36,11 +36,11 @@ def signup():
     user_address = insertValues['user_address']
     user_photo = '' #--?
     e_id = Wallet.encryption_id_card(user_id)
-    check_id = getData.Check_id(e_id)
+    check_id = checkData.Check_id(e_id)
     if check_id:
         user_account = insertValues['user_account']
         user_password = insertValues['user_password']
-        check_account = getData.Check_account(user_account)
+        check_account = checkData.Check_account(user_account)
         if check_account:
             walletaddress, private_key = Wallet.generate_address()
             public_key = walletaddress
@@ -60,7 +60,7 @@ def verifyid():
     insertValues = request.get_json()
     user_id = insertValues['user_id']
     e_id = Wallet.encryption_id_card(user_id)
-    check_id = getData.Check_account(e_id)
+    check_id = checkData.Check_account(e_id)
     if check_id:
         return jsonify({'result': 'success'})
     else:
