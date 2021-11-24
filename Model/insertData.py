@@ -1,7 +1,9 @@
 from pymongo import MongoClient
-from Model import Wallet
+from Blockchain import Wallet
+from Model import getData
 import gridfs
-import cv2
+import numpy as np
+import cryptocode
 
 #local host
 conn = MongoClient()
@@ -31,8 +33,8 @@ col_Community_bulletin.stats
 col_System_bulletin.stats
 col_Community.stats
 
-# 新增_使用者資訊
-def insert_Information_user(name,sex,id_card,birth,email,phone,address,account,photo_id,walletaddress,public_key,e_private_key,e_password): #加入帳戶資訊
+# 新增使用者資訊
+def insert_Information_user(name,sex,id_card,birth,email,phone,address,account,photo_id,wallet_address,public_key,e_private_key,e_password): #加入帳戶資訊
     data = {
       'name': name,
       'sex': sex,
@@ -43,7 +45,7 @@ def insert_Information_user(name,sex,id_card,birth,email,phone,address,account,p
       'address': address,
       'account': account,
       'photo_id': photo_id,
-      'walletaddress': walletaddress,
+      'wallet_address': wallet_address,
       'public_key': public_key,
       'private_key': e_private_key,
       'e_password': e_password
@@ -52,13 +54,13 @@ def insert_Information_user(name,sex,id_card,birth,email,phone,address,account,p
     return(info)
 
 # 新增_需求資訊
-def insert_Information_demand(requester_id,applicant_id,Photo_id,productname,amount,details):
+def insert_information_demand(requester_account,applicant_account,Photo_id,product_name,amount,details):
     data = {
-      'requester_id': requester_id,
-      'applicant_id': applicant_id,
-      'demand_imfor':{
-        'Photo_id': Photo_id,
-        'productname': productname,
+      'requester_account': requester_account,
+      'applicant_account': applicant_account,
+      'demand_info':{
+        'photo_id': Photo_id,
+        'product_name': product_name,
         'amount': amount,
         'details': details
       }
@@ -76,7 +78,78 @@ def insert_Photo(length,chunkSize,uploadDate,filename,metadata):
     }
     col_Photo.insert_one(data)
 
-# 寫入_照片檔案
+# 新增_社區管理員審核名單
+def insert_Check_community_manager(applicant_account, apply_community, reason):
+    data = {
+      'applicant_account': applicant_account,
+      'apply_community': apply_community
+    }
+    col_Check_community_manager.insert_one(data)
+
+# 新增_社區用戶審核名單
+def insert_Check_community_user(applicant_account, apply_community, applyaddress):
+    data = {
+      'applicant_account': applicant_account,
+      'apply_community': apply_community,
+      'apply_address': applyaddress
+    }
+    col_Check_community_user.insert_one(data)
+
+# 新增_創建社區審核清單
+def insert_Check_createcommunity(applicant_account, community, currency_name, circulation):
+    data = {
+      'applicant_account': applicant_account,
+      'community': community,
+      'currency_name': currency_name,
+      'circulation': circulation
+    }
+    col_Check_createcommunity.insert_one(data)   
+
+# 新增_社區用戶名單
+def insert_Community_members(account,community,community_address,identity):
+    myquery = {'account': account}
+    cursor = col_Community_members.find(myquery)
+    data = [d for d in cursor]
+    if data == list([]):
+      data = {
+        'account': account,
+        'community': [community], 
+        'community_address': [community_address],
+        'identity': [identity] # ('管理員'、'一般用戶')
+      }
+      col_Community_members.insert_one(data) 
+      return True  
+    else:
+      col_Community_members.update_many({"account": account}, {'$addToSet': {"community":{"$each" : [community]}, "community_address":{"$each" : [community_address]},"identity":{"$each" : [identity]}}})
+
+# 新增_平台管理者
+def insert_System_members(account):
+    cursor = col_System_members.find()
+    data = [d for d in cursor]
+    if data == list([]):
+      print('Please create system member first!')
+    else:
+      system_wallet_address = getData.taken_plat_address()
+      col_System_members.update_many({"system_wallet_address": system_wallet_address}, {'$addToSet': {"account" :{"$each" :account}}})
+
+# 新增_平台管理者名單(創建)
+def create_system_members(account,platform_password):
+  system_wallet_address,system_private_key = Wallet.generate_address()
+  e_platform_password = Wallet.encryption_id_card(platform_password)
+  e_system_private_key = Wallet.encryption_privatekey(system_private_key, platform_password) #傳入私鑰與明文密碼
+  cursor = col_System_members.find()
+  data = [d for d in cursor]
+  if data == list([]):
+    data = {
+      'account': [account],
+      'platform_password': e_platform_password,
+      'system_wallet_address': system_wallet_address,
+      'system_private_key': e_system_private_key
+    }
+    col_System_members.insert_one(data) 
+
+
+# 新增_照片檔案寫入資料庫
 def store_photo(name):
     file_location =  name
     file_data = open(file_location, "rb")
@@ -85,60 +158,10 @@ def store_photo(name):
     fs.put(data, filename = name) #寫入資料庫
     print("upload complete")
 
-# 新增_社區管理員審核名單
-def insert_Check_community_manager(applicant_id,reason):
-    data = {
-      'applicant_id': applicant_id,
-      'reason': reason
-    }
-    col_Check_community_manager.insert_one(data)
-
-# 新增_社區用戶審核名單
-def insert_Check_community_user(applicant_id,applyaddress):
-    data = {
-      'applicant_id': applicant_id,
-      'applyaddress': applyaddress
-    }
-    col_Check_community_user.insert_one(data)
-
-# 新增_創建社區審核清單
-def insert_Check_createcommunity(applicant_id,communityname,communityaddress):
-    data = {
-      'applicant_id': applicant_id,
-      'communityname': communityname,
-      'communityaddress': communityaddress
-    }
-    col_Check_createcommunity.insert_one(data)   
-
-# 新增_平台管理者名單
-def insert_System_members(account):
-    data = {
-      'account': account
-    }
-    col_System_members.insert_one(data) 
-
-# 新增_社區用戶名單
-def insert_Communitymembers(user_id,communityaddress,identity):
-    data = {
-      'user_id':user_id, ###改Validation 取名
-      'communityaddress': communityaddress,
-      'identity': identity
-    }
-    col_Community_members.insert_one(data)   
-
-# 新增_社區名單
-def insert_community(community, community_wallet_address, community_private_key):
-    data = {
-        'community': community,
-        'community_wallet_address': community_wallet_address,
-        'community_private_key': community_private_key
-    }
-    col_Community.insert_one(data)
-
 # 新增_社區公告
 def insert_Community_bulletin(communityname, bul_title, bul_context):
     data = {
-        'communityname': communityname,
+        'community_name': communityname,
         'bulletin_title': bul_title,
         'bulletin_context': bul_context
     }
@@ -152,28 +175,17 @@ def insert_System_bulletin(bul_title, bul_context):
     }
     col_System_bulletin.insert_one(data)
 
+# 新增_社區名單
+def insert_community(community, community_wallet_address, community_private_key):
+    data = {
+        'community': community,
+        'community_wallet_address': community_wallet_address,
+        'community_private_key': community_private_key
+    }
+    col_Community.insert_one(data)
 
-
-# --------test--------
-# def register():
-#   name = "葉清偉"
-#   sex = "男"
-#   id_card = "F274234929"
-#   birth = "1999-08-13"
-#   #database-date
-#   #birth = datetime.datetime.strptime("2017-10-13T10:53:53.000Z", "%Y-%m-%dT%H:%M:%S.000Z")
-#   email = "fewffw"
-#   phone = "0974613264"
-#   address = ["桃園"]
-#   account = "rgrwgN"
-#   e_id_card = Wallet.encryption_id_card(id_card,account)
-#   photo_id = "wfwfwfefwr"
-#   walletaddress,private_key = Wallet.generate_address() #產生公私鑰地址
-#   public_key = walletaddress 
-#   #密碼
-#   password = "GFGwfwfe3"
-#   e_password = Wallet.encryption_password(password,e_id_card) #加密密碼
-#   e_private_key = Wallet.encryption_privatekey(private_key,password) #加密私鑰
-#   insert_Information_user(name,sex,e_id_card,birth,email,phone,address,account,photo_id,walletaddress,public_key,e_private_key,e_password)
-
-# print(Taken_privatekey('rgrwgN','GFGwfwfe3'))
+# ----test----
+# insert_System_members('10')
+# system_members(['53'],'platform_password','system_wallet_address','system_private_key')
+# insert_System_members(['10'])
+  
