@@ -14,7 +14,7 @@ def login():
     user_password = insertValues['user_password']
     user_id = insertValues['user_id']
     verify_epass = Wallet.encryption_password(user_password, user_id)
-    user_epass = getData.Taken_password(user_account)
+    user_epass = getData.taken_password(user_account)
     if verify_epass == user_epass:
         print("success")
         return jsonify({'result': 'success'})
@@ -36,11 +36,11 @@ def signup():
     user_address = insertValues['user_address']
     user_photo = '' #--?
     e_id = Wallet.encryption_id_card(user_id)
-    check_id = checkData.Check_id(e_id)
+    check_id = checkData.check_id(e_id)
     if check_id:
         user_account = insertValues['user_account']
         user_password = insertValues['user_password']
-        check_account = checkData.Check_account(user_account)
+        check_account = checkData.check_account(user_account)
         if check_account:
             walletaddress, private_key = Wallet.generate_address()
             public_key = walletaddress
@@ -60,7 +60,7 @@ def verifyid():
     insertValues = request.get_json()
     user_id = insertValues['user_id']
     e_id = Wallet.encryption_id_card(user_id)
-    check_id = getData.Check_account(e_id)
+    check_id = checkData.check_account(e_id)
     if check_id:
         return jsonify({'result': 'success'})
     else:
@@ -87,14 +87,28 @@ def createSysNew():
     insertData.insert_System_bulletin(bul_title, bul_context)
     return jsonify({'result': 'success'})
 
-# [user_account, user_password, user_id]
+# 取得_此帳號所加入的所有社區的清單
+# [user_account]
 @app.route('/user-community', methods=['POST'])
 def getUserCommunity():
     insertValues = request.get_json()
     user_account = insertValues['user_account']
     isjoincommunity = checkData.check_has_community(user_account)
     issystemmanager = checkData.check_is_system_manage(user_account)
-
+    result = dict({})
+    community_list = list([])
+    if isjoincommunity: # 有加入社區
+        community_list = getData.taken_comandid(user_account)
+    if issystemmanager: # 是平台管理員
+        system_dict = {'community': '平台', 'identity': '平台管理員'}
+        community_list.insert(0, system_dict)
+    if community_list != []:
+        result['all_community'] = community_list
+        result['result'] = 'one'
+    else:
+        result['result'] = 'two'
+    return jsonify(result)
 
 if __name__ == '__main__':
     app.run(host='192.168.0.108', port='5000', debug=True)
+    # app.run(debug=True)

@@ -1,6 +1,5 @@
 from pymongo import MongoClient
-from Blockchain import Wallet
-from Model import getData
+from Model import getData, Wallet
 import gridfs
 import numpy as np
 import cryptocode
