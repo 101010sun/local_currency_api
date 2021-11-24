@@ -87,6 +87,13 @@ def createSysNew():
     insertData.insert_System_bulletin(bul_title, bul_context)
     return jsonify({'result': 'success'})
 
+# [user_account, user_password, user_id]
+@app.route('/user-community', methods=['POST'])
+def getUserCommunity():
+    insertValues = request.get_json()
+    user_account = insertValues['user_account']
+    isjoincommunity = checkData.check_has_community(user_account)
+    issystemmanager = checkData.check_is_system_manage(user_account)
 
 
 if __name__ == '__main__':
