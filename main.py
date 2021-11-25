@@ -112,6 +112,51 @@ def getUserCommunity():
         result['result'] = 'two'
     return jsonify(result)
 
+# 申請_創建社區
+# [user_account, community_name, currency_name, circulation]
+@app.route('/apply/create-community', methods=['POST'])
+def createCommunity():
+    insertValue = request.get_json()
+    user_account = insertValue['user_account']
+    community_name = insertValue['community_name']
+    currency_name = insertValue['currency_name']
+    circulation = float(insertValue['circulation'])
+    insertData.insert_Check_createcommunity(user_account, community_name, currency_name, circulation)
+    return jsonify({'result': 'success'})
+
+# 取得_所有社區清單
+@app.route('get-all-community', methods=['POST'])
+def getAllCommunity():
+    community_list = getData.take_community()
+    return jsonify(community_list)
+
+# 申請_加入社區
+@app.route('/apply/join-community', methods=['POST'])
+def joinCommunity():
+    insertValue = request.get_json()
+    user_account = insertValue['user_account']
+    apply_community = insertValue['apply_community']
+    apply_addresss = insertValue['apply_address']
+    insertData.insert_Check_community_user(user_account, apply_community, apply_addresss)
+    return jsonify({'result': 'success'})
+
+# 驗證_平台管理員密碼
+@app.route('/identity/system-password', methods=['POST'])
+def identitySysPass():
+    insertValue = request.get_json()
+    system_password = insertValue['system_password']
+    issyspasscurrent = checkData.check_platform_password(system_password)
+    if issyspasscurrent:
+        return jsonify({'result': 'success'})
+    else:
+        return jsonify({'result': 'fail', 'reason': '平台密碼錯誤!'})
+
+# 取得_創建社區清單
+@app.route('/get-create-community-list', methods=['POST'])
+def getCreateComList():
+    create_list = getData.take_create_community()
+    return jsonify(create_list)
+
 if __name__ == '__main__':
     app.run(host='192.168.0.108', port='5000', debug=True)
     # app.run(debug=True)
