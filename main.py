@@ -98,7 +98,10 @@ def getUserCommunity():
     result = dict({})
     community_list = list([])
     if isjoincommunity: # 有加入社區
-        community_list = getData.taken_comandid(user_account)
+        tmp_community = getData.taken_comandid(user_account)
+        for i in range(0, len(tmp_community[0]['community'])):
+            tmp = {'community': tmp_community[0]['community'][i], 'identity': tmp_community[0]['identity'][i]}
+            community_list.append(tmp)
     if issystemmanager: # 是平台管理員
         system_dict = {'community': '平台', 'identity': '平台管理員'}
         community_list.insert(0, system_dict)
