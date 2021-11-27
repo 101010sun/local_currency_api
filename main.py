@@ -125,7 +125,7 @@ def createCommunity():
     return jsonify({'result': 'success'})
 
 # 取得_所有社區清單
-@app.route('get-all-community', methods=['POST'])
+@app.route('/get-all-community', methods=['POST'])
 def getAllCommunity():
     community_list = getData.take_community()
     return jsonify(community_list)
