@@ -131,6 +131,7 @@ def getAllCommunity():
     return jsonify(community_list)
 
 # 申請_加入社區
+# [user_account, apply_community, apply_address]
 @app.route('/apply/join-community', methods=['POST'])
 def joinCommunity():
     insertValue = request.get_json()
@@ -141,6 +142,7 @@ def joinCommunity():
     return jsonify({'result': 'success'})
 
 # 驗證_平台管理員密碼
+# [system_password]
 @app.route('/identity/system-password', methods=['POST'])
 def identitySysPass():
     insertValue = request.get_json()
